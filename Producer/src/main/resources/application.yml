@@ -1,0 +1,57 @@
+server:
+  port: 8082
+
+spring:
+  cloud:
+    stream:
+      bindings:
+        sendtestobject-out-0:
+          destination: my-topic
+          binder: local_rabbit
+          contentType: application/json
+
+        test-out-0:
+          destination: trash
+          binder: local_rabbit
+
+      rabbit:
+        bindings:
+          sendtestobject-out-0:
+            producer:
+              deliveryMode: PERSISTENT
+
+      rocketmq:
+        bindings:
+          sendtestobject-out-0:
+            producer:
+              sync: false # WORKS
+        binder:
+          name-server: localhost:9876 # local ->  localhost:9876 | docker -> namesrv:9876 WORKS
+
+      binders:
+        local_rabbit:
+          type: rabbit
+          environment:
+            spring:
+              rabbitmq:
+                host: localhost # local -> localhost | docker -> rabbitmq
+                port: 5672
+                username: guest
+                password: guest
+                virtual-host: /
+
+        local_rocket:
+          type: rocketmq
+          environment:
+            rocketmq:
+              producer:
+                group: producergroup123
+                sync: true
+                send-message-timeout: 300000
+                compress-message-body-threshold: 4096
+                max-message-size: 4194304
+                retry-times-when-send-async-failed: 3
+                retry-next-server: false
+                retry-times-when-send-failed: 2
+
+

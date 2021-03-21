@@ -1,0 +1,5 @@
+docker-compose down && mvn clean install && docker-compose build
+
+docker-compose down
+
+docker cp  first-prototype_consumer_1:/project/result.csv ./result.csv
