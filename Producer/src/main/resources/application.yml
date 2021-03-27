@@ -7,12 +7,8 @@ spring:
       bindings:
         sendtestobject-out-0:
           destination: my-topic
-          binder: local_rabbit
+          binder: local_rocket
           contentType: application/json
-
-        test-out-0:
-          destination: trash
-          binder: local_rabbit
 
       rabbit:
         bindings:
@@ -24,9 +20,9 @@ spring:
         bindings:
           sendtestobject-out-0:
             producer:
-              sync: false # WORKS
+              sync: false  # must be false, true is too slow | WORKS
         binder:
-          name-server: localhost:9876 # local ->  localhost:9876 | docker -> namesrv:9876 WORKS
+          name-server: namesrv:9876 # local ->  localhost:9876 | docker -> namesrv:9876 WORKS
 
       binders:
         local_rabbit:
@@ -34,7 +30,7 @@ spring:
           environment:
             spring:
               rabbitmq:
-                host: localhost # local -> localhost | docker -> rabbitmq
+                host: rabbitmq # local -> localhost | docker -> rabbitmq
                 port: 5672
                 username: guest
                 password: guest
@@ -45,8 +41,7 @@ spring:
           environment:
             rocketmq:
               producer:
-                group: producergroup123
-                sync: true
+                group: producergroup1
                 send-message-timeout: 300000
                 compress-message-body-threshold: 4096
                 max-message-size: 4194304

@@ -2,15 +2,15 @@ version: '3.9'
 
 services:
 
-  #  producer:
-  #    build:
-  #      context: .
-  #      dockerfile: producer.Dockerfile
-  #
-  #  consumer:
-  #    build:
-  #      context: .
-  #      dockerfile: consumer.Dockerfile
+  producer:
+    build:
+      context: .
+      dockerfile: producer.Dockerfile
+
+  consumer:
+    build:
+      context: .
+      dockerfile: consumer.Dockerfile
 
   # ----------------------- RabbitMQ -----------------------
 #  rabbitmq:
@@ -22,9 +22,6 @@ services:
 #    ports:
 #      - "15672:15672"
 #      - "5672:5672"
-
-
-
 
   # ----------------------- RocketMQ -----------------------
   namesrv:

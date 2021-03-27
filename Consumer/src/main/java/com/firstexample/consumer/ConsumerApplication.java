@@ -1,19 +1,18 @@
 package com.firstexample.consumer;
 
-import com.firstexample.common.TestObject;
+import com.firstexample.common.Person;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
-import static com.firstexample.common.Settings.MESSAGES_TO_SEND;
+import static com.firstexample.common.Settings.*;
 
 @Slf4j
 @EnableScheduling
@@ -22,7 +21,7 @@ public class ConsumerApplication implements CommandLineRunner {
 
     private static final String RESULT_FILE_NAME = "result.csv";
 
-    private final ConcurrentLinkedQueue<TestObject> receivedTestObjects = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<Person> receivedTestObjects = new ConcurrentLinkedQueue<>();
     private final AtomicLong receivedTestObjectsCount = new AtomicLong(0);
 
 
@@ -31,11 +30,17 @@ public class ConsumerApplication implements CommandLineRunner {
     }
 
     @Bean
-    public Consumer<TestObject> receiveTestObject() {
-        return testObject -> {
-            testObject.setReceiveTimestamp(System.currentTimeMillis());
-            receivedTestObjects.add(testObject);
-            if (receivedTestObjectsCount.incrementAndGet() == MESSAGES_TO_SEND) {
+    public Consumer<Person> receiveTestObject() {
+        return person -> {
+            if(person.getControlNumber() == IGNORE_CONTROL_NUMBER){
+                return;
+            }
+            final long currentCount = receivedTestObjectsCount.incrementAndGet();
+
+            person.setReceiveTimestamp(System.currentTimeMillis());
+            receivedTestObjects.add(person);
+
+            if (currentCount == MESSAGES_TO_SEND) {
                 executeAfterAllReceived();
             }
         };
@@ -49,12 +54,6 @@ public class ConsumerApplication implements CommandLineRunner {
     @Override
     public void run(String... args) {
     }
-
-//    @Scheduled(fixedDelay = 5000L)
-//    public void bla(){
-//        System.out.println(receivedTestObjectsCount.get());
-//        System.out.println(receivedTestObjects.size());
-//    }
 
     private void executeAfterAllReceived() {
         try {

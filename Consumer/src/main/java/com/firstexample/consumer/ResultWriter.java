@@ -1,6 +1,6 @@
 package com.firstexample.consumer;
 
-import com.firstexample.common.TestObject;
+import com.firstexample.common.Person;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
@@ -15,21 +15,21 @@ public class ResultWriter {
 
     private static final String[] CSV_HEADER = {"name", "number", "send[ms]", "send[DATETIME]", "receive[ms]", "receive[DATETIME]", "difference[ms]"};
 
-    public static void writeResult(String fileName, Iterable<TestObject> result) {
+    public static void writeResult(String fileName, Iterable<Person> result) {
         try {
             FileWriter out = new FileWriter(fileName);
             try (CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(CSV_HEADER))) {
-                result.forEach(testObject -> {
+                result.forEach(person -> {
                     try {
                         printer.printRecord(
                                 Arrays.asList(
-                                        testObject.getName(),
-                                        testObject.getNumber(),
-                                        testObject.getSendTimestamp(),
-                                        LocalDateTime.ofInstant(Instant.ofEpochMilli(testObject.getSendTimestamp()), ZoneId.systemDefault()),
-                                        testObject.getReceiveTimestamp(),
-                                        LocalDateTime.ofInstant(Instant.ofEpochMilli(testObject.getReceiveTimestamp()), ZoneId.systemDefault()),
-                                        testObject.getReceiveTimestamp() - testObject.getSendTimestamp()
+                                        person.getFirstName(),
+                                        person.getControlNumber(),
+                                        person.getSendTimestamp(),
+                                        LocalDateTime.ofInstant(Instant.ofEpochMilli(person.getSendTimestamp()), ZoneId.systemDefault()),
+                                        person.getReceiveTimestamp(),
+                                        LocalDateTime.ofInstant(Instant.ofEpochMilli(person.getReceiveTimestamp()), ZoneId.systemDefault()),
+                                        person.getReceiveTimestamp() - person.getSendTimestamp()
                                 ));
                     } catch (IOException e) {
                         e.printStackTrace();

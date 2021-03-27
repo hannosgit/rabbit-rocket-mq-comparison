@@ -1,42 +1,36 @@
 package com.firstexample.producer;
 
-import com.firstexample.common.TestObject;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.firstexample.common.Person;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.stream.function.StreamBridge;
-import org.springframework.context.annotation.Bean;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.scheduling.support.PeriodicTrigger;
 
-import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.TemporalUnit;
-import java.util.Arrays;
-import java.util.Timer;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
-import static com.firstexample.common.Settings.MESSAGES_TO_SEND;
+import static com.firstexample.common.Settings.*;
 
 @Slf4j
 @SpringBootApplication
 public class ProducerApplication implements CommandLineRunner {
 
-    private final int[] numbersToSend = IntStream.rangeClosed(1, MESSAGES_TO_SEND).toArray();
+    private final long TOTAL_MESSAGES_TO_SEND = MESSAGES_BEFORE_START + MESSAGES_TO_SEND;
+
+    private final long[] numbersToSend = LongStream.concat(LongStream.rangeClosed(1, MESSAGES_BEFORE_START).map(operand -> IGNORE_CONTROL_NUMBER), LongStream.rangeClosed(1, MESSAGES_TO_SEND)).toArray();
 
     private final AtomicInteger cnt = new AtomicInteger(0);
 
     @Autowired
     private StreamBridge streamBridge;
 
-    private final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(100);
+    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
     public static void main(String[] args) {
         SpringApplication.run(ProducerApplication.class, args);
@@ -44,26 +38,24 @@ public class ProducerApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        log.info("checksum = {}", Arrays.stream(numbersToSend).sum());
+        log.info("checksum = {}", LongStream.rangeClosed(1, MESSAGES_TO_SEND).sum());
 
-        streamBridge.send("test-out-0", "123");
-        log.info("start sending, {}", Instant.now());
-
-        executorService.scheduleAtFixedRate(sendMessage(),1_000_000,100,TimeUnit.MICROSECONDS);
+        log.info("Start sending at {}", Instant.now());
+        executorService.scheduleAtFixedRate(sendMessage(), 1_000_000, 1, TimeUnit.MICROSECONDS);
     }
 
 
     private Runnable sendMessage() {
         return () -> {
             int currentCnt = cnt.getAndIncrement();
-            if(currentCnt >= MESSAGES_TO_SEND){
-                log.info("sending done! cnt: {}, arraysize: {}",cnt.get(),numbersToSend.length);
+            if (currentCnt >= TOTAL_MESSAGES_TO_SEND) {
+                log.info("sending done! cnt: {}, arraysize: {}", cnt.get(), numbersToSend.length);
                 executorService.shutdown();
                 return;
             }
-            TestObject testObject = new TestObject("john", numbersToSend[currentCnt], 0, 0);
-            testObject.setSendTimestamp(System.currentTimeMillis());
-            streamBridge.send("sendtestobject-out-0", testObject);
+            Person person = new Person(1, "John", "Smith", "New York", numbersToSend[currentCnt], 0, 0);
+            person.setSendTimestamp(System.currentTimeMillis());
+            streamBridge.send("sendtestobject-out-0", person);
         };
 
     }

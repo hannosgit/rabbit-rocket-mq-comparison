@@ -10,23 +10,23 @@ spring:
         receiveTestObject-in-0:
           destination: my-topic
           group: myconsumergroup
-          binder: local_rabbit
+          binder: local_rocket
           contentType: application/json
           consumer:
-            concurrency: 50 # (for RocketMQ) WORKS
+            concurrency: 1 # (for RocketMQ) WORKS
 
       rocketmq:
         binder:
-          name-server: localhost:9876 # local ->  localhost:9876 | docker -> namesrv:9876 WORKS
+          name-server: namesrv:9876 # local ->  localhost:9876 | docker -> namesrv:9876 WORKS
 
       rabbit:
         bindings:
           receiveTestObject-in-0:
             consumer:
               containerType: SIMPLE # WORKS
-              maxConcurrency: 50 # WORKS
+              maxConcurrency: 1 # 1 provides best values and is default
               acknowledgeMode: AUTO  # WORKS
-              txSize: 1000  # WORKS
+              txSize: 200  # WORKS  value suggested in https://www.rabbitmq.com/confirms.html
 
       binders:
         local_rabbit:
@@ -34,7 +34,7 @@ spring:
           environment:
             spring:
               rabbitmq:
-                host: localhost # local -> localhost | docker -> rabbitmq
+                host: rabbitmq # local -> localhost | docker -> rabbitmq
                 port: 5672 # WORKS
                 username: guest # WORKS
                 password: guest # WORKS
