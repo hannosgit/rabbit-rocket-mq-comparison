@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
-import static com.firstexample.common.Settings.*;
+import static com.firstexample.common.Settings.MESSAGES_TO_SEND;
 
 @Slf4j
 @EnableScheduling
@@ -32,15 +32,13 @@ public class ConsumerApplication implements CommandLineRunner {
     @Bean
     public Consumer<Person> receiveTestObject() {
         return person -> {
-            if(person.getControlNumber() == IGNORE_CONTROL_NUMBER){
-                return;
-            }
             final long currentCount = receivedTestObjectsCount.incrementAndGet();
 
             person.setReceiveTimestamp(System.currentTimeMillis());
             receivedTestObjects.add(person);
 
             if (currentCount == MESSAGES_TO_SEND) {
+                System.out.printf("Received %s messages%n", MESSAGES_TO_SEND);
                 executeAfterAllReceived();
             }
         };

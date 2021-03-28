@@ -7,7 +7,7 @@ spring:
       bindings:
         sendtestobject-out-0:
           destination: my-topic
-          binder: local_rocket
+          binder: local_rabbit
           contentType: application/json
 
       rabbit:
@@ -15,14 +15,6 @@ spring:
           sendtestobject-out-0:
             producer:
               deliveryMode: PERSISTENT
-
-      rocketmq:
-        bindings:
-          sendtestobject-out-0:
-            producer:
-              sync: false  # must be false, true is too slow | WORKS
-        binder:
-          name-server: namesrv:9876 # local ->  localhost:9876 | docker -> namesrv:9876 WORKS
 
       binders:
         local_rabbit:
@@ -48,5 +40,13 @@ spring:
                 retry-times-when-send-async-failed: 3
                 retry-next-server: false
                 retry-times-when-send-failed: 2
+
+      rocketmq:
+        bindings:
+          sendtestobject-out-0:
+            producer:
+              sync: false  # must be false, true is too slow | WORKS
+        binder:
+          name-server: namesrv:9876 # local ->  localhost:9876 | docker -> namesrv:9876 WORKS
 
 

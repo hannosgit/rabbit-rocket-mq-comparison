@@ -15,17 +15,19 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.LongStream;
 
-import static com.firstexample.common.Settings.*;
+import static com.firstexample.common.Settings.MESSAGES_TO_SEND;
 
 @Slf4j
 @SpringBootApplication
 public class ProducerApplication implements CommandLineRunner {
 
-    private final long TOTAL_MESSAGES_TO_SEND = MESSAGES_BEFORE_START + MESSAGES_TO_SEND;
-
-    private final long[] numbersToSend = LongStream.concat(LongStream.rangeClosed(1, MESSAGES_BEFORE_START).map(operand -> IGNORE_CONTROL_NUMBER), LongStream.rangeClosed(1, MESSAGES_TO_SEND)).toArray();
+    private final long[] numbersToSend = LongStream.rangeClosed(1, MESSAGES_TO_SEND).toArray();
 
     private final AtomicInteger cnt = new AtomicInteger(0);
+
+    private static final int BYTES_TO_FILL = 842;
+
+    private static final String PADDING = "A".repeat(BYTES_TO_FILL);
 
     @Autowired
     private StreamBridge streamBridge;
@@ -48,12 +50,12 @@ public class ProducerApplication implements CommandLineRunner {
     private Runnable sendMessage() {
         return () -> {
             int currentCnt = cnt.getAndIncrement();
-            if (currentCnt >= TOTAL_MESSAGES_TO_SEND) {
+            if (currentCnt >= MESSAGES_TO_SEND) {
                 log.info("sending done! cnt: {}, arraysize: {}", cnt.get(), numbersToSend.length);
                 executorService.shutdown();
                 return;
             }
-            Person person = new Person(1, "John", "Smith", "New York", numbersToSend[currentCnt], 0, 0);
+            Person person = new Person(1, "John", "Smith", "New York", PADDING, numbersToSend[currentCnt], 0, 0);
             person.setSendTimestamp(System.currentTimeMillis());
             streamBridge.send("sendtestobject-out-0", person);
         };
