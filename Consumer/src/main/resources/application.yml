@@ -16,7 +16,6 @@ spring:
             concurrency: 1 # 1 is enough (for RocketMQ) WORKS
 
       binders:
-
         local_rocket:
           type: rocketmq
 
