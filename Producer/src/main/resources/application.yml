@@ -7,26 +7,10 @@ spring:
       bindings:
         sendtestobject-out-0:
           destination: my-topic
-          binder: local_rabbit
+          binder: local_rocket
           contentType: application/json
 
-      rabbit:
-        bindings:
-          sendtestobject-out-0:
-            producer:
-              deliveryMode: PERSISTENT
-
       binders:
-        local_rabbit:
-          type: rabbit
-          environment:
-            spring:
-              rabbitmq:
-                host: rabbitmq # local -> localhost | docker -> rabbitmq
-                port: 5672
-                username: guest
-                password: guest
-                virtual-host: /
 
         local_rocket:
           type: rocketmq
@@ -47,6 +31,6 @@ spring:
             producer:
               sync: false  # must be false, true is too slow | WORKS
         binder:
-          name-server: namesrv:9876 # local ->  localhost:9876 | docker -> namesrv:9876 WORKS
+          name-server: localhost:9876 # local ->  localhost:9876 | docker -> namesrv:9876 WORKS
 
 
