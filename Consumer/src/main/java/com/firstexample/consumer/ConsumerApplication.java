@@ -7,6 +7,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
@@ -67,5 +68,9 @@ public class ConsumerApplication implements CommandLineRunner {
         }
     }
 
+    @Scheduled(fixedDelay = 10_000L)
+    private void log(){
+        log.info("Objects received: {}",receivedTestObjectsCount.get());
+    }
 
 }

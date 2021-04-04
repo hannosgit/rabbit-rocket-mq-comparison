@@ -6,6 +6,8 @@ services:
     build:
       context: .
       dockerfile: producer.Dockerfile
+    environment:
+      - send_interval=100
 
   consumer:
     build:
@@ -13,34 +15,55 @@ services:
       dockerfile: consumer.Dockerfile
 
   # ----------------------- RabbitMQ -----------------------
-  rabbitmq:
-    image: "rabbitmq:3.8.14-alpine"
-    environment:
-      RABBITMQ_DEFAULT_USER: "guest"
-      RABBITMQ_DEFAULT_PASS: "guest"
-      RABBITMQ_DEFAULT_VHOST: "/"
-    ports:
-      - "15672:15672"
-      - "5672:5672"
+#  rabbitmq:
+#    image: "rabbitmq:3.8.14-alpine"
+#    environment:
+#      RABBITMQ_DEFAULT_USER: "guest"
+#      RABBITMQ_DEFAULT_PASS: "guest"
+#      RABBITMQ_DEFAULT_VHOST: "/"
+#    ports:
+#      - "15672:15672"
+#      - "5672:5672"
 
   # ----------------------- RocketMQ -----------------------
-#  namesrv:
-#    image: apacherocketmq/rocketmq:4.8.0-alpine
-#    ports:
-#      - 9876:9876
-#    volumes:
-#      - ./rocketmq/namesrv/logs:/home/rocketmq/logs
-#    command: sh mqnamesrv
-#
-#  broker:
-#    image: apacherocketmq/rocketmq:4.8.0-alpine
-#    ports:
-#      - 10909:10909
-#      - 10911:10911
-#      - 10912:10912
-#    volumes:
-#      - ./rocketmq/broker.conf:/home/rocketmq/rocketmq-4.8.0/conf/broker.conf
-#      - ./rocketmq/broker/logs:/home/rocketmq/logs
-#    command: sh mqbroker -n namesrv:9876 -c /home/rocketmq/rocketmq-4.8.0/conf/broker.conf
-#    depends_on:
-#      - namesrv
+  namesrv:
+    image: apacherocketmq/rocketmq:4.8.0-alpine
+    ports:
+      - 9876:9876
+    volumes:
+      - ./rocketmq/namesrv/logs:/home/rocketmq/logs
+    command: sh mqnamesrv
+
+  broker:
+    image: apacherocketmq/rocketmq:4.8.0-alpine
+    ports:
+      - 10909:10909
+      - 10911:10911
+      - 10912:10912
+    volumes:
+      - ./rocketmq/broker.conf:/home/rocketmq/rocketmq-4.8.0/conf/broker.conf
+      - ./rocketmq/broker/logs:/home/rocketmq/logs
+    command: sh mqbroker -n namesrv:9876 -c /home/rocketmq/rocketmq-4.8.0/conf/broker.conf
+    depends_on:
+      - namesrv
+
+  rocketmqexporter:
+    image: rocketmq-exporter:latest
+    ports:
+      - 5557:5557
+    environment:
+      - rocketmq_config_namesrvAddr=namesrv:9876
+      - rocketmq_config_webTelemetryPath=/metrics
+      - server_port=5557
+      - rocketmq_config_rocketmqVersion=V4_8_0
+    depends_on:
+      - broker
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090
+    depends_on:
+      - rocketmqexporter

@@ -1,4 +1,4 @@
-docker-compose down && mvn clean install && docker-compose build
+docker-compose down && mvn clean install && docker-compose build && docker-compose up -d namesrv && docker-compose  up -d broker && docker-compose  up -d rocketmqexporter && docker-compose  up -d prometheus  && docker-compose  up -d consumer && timeout /T 60 && docker-compose  up -d producer
 
 docker-compose down
 

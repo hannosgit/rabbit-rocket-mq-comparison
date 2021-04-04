@@ -3,6 +3,7 @@ package com.firstexample.producer;
 import com.firstexample.common.Person;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -29,6 +30,9 @@ public class ProducerApplication implements CommandLineRunner {
 
     private static final String PADDING = "A".repeat(BYTES_TO_FILL);
 
+    @Value("${send.interval}")
+    private int sendInterval;
+
     @Autowired
     private StreamBridge streamBridge;
 
@@ -40,10 +44,11 @@ public class ProducerApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        log.info("send interval = {} microseconds", this.sendInterval);
         log.info("checksum = {}", LongStream.rangeClosed(1, MESSAGES_TO_SEND).sum());
 
         log.info("Start sending at {}", Instant.now());
-        executorService.scheduleAtFixedRate(sendMessage(), 1_000_000, 1, TimeUnit.MICROSECONDS);
+        executorService.scheduleAtFixedRate(sendMessage(), 1_000_000, sendInterval, TimeUnit.MICROSECONDS);
     }
 
 
@@ -51,7 +56,7 @@ public class ProducerApplication implements CommandLineRunner {
         return () -> {
             int currentCnt = cnt.getAndIncrement();
             if (currentCnt >= MESSAGES_TO_SEND) {
-                log.info("sending done! cnt: {}, arraysize: {}", cnt.get(), numbersToSend.length);
+                log.info("sending done at {}! cnt: {}, arraysize: {}", Instant.now(), cnt.get(), numbersToSend.length);
                 executorService.shutdown();
                 return;
             }

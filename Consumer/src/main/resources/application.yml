@@ -21,6 +21,6 @@ spring:
 
       rocketmq:
         binder:
-          name-server: localhost:9876 # local ->  localhost:9876 | docker -> namesrv:9876 WORKS
+          name-server: namesrv:9876 # local ->  localhost:9876 | docker -> namesrv:9876 WORKS
 
 
