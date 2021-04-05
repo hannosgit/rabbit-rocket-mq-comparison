@@ -5,6 +5,8 @@ ENV APPLICATION_NAME=$APPLICATION_NAME
 
 WORKDIR /project
 
+RUN mkdir /project/results
+
 COPY ./Consumer/target/${APPLICATION_NAME} /project/${APPLICATION_NAME}
 
 

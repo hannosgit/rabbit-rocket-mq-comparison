@@ -13,7 +13,7 @@ import java.util.Arrays;
 
 public class ResultWriter {
 
-    private static final String[] CSV_HEADER = {"name", "number", "send[ms]", "send[DATETIME]", "receive[ms]", "receive[DATETIME]", "difference[ms]"};
+    private static final String[] CSV_HEADER = {"message number", "send[ms]", "send[DATETIME]", "receive[ms]", "receive[DATETIME]", "difference[ms]"};
 
     public static void writeResult(String fileName, Iterable<Person> result) {
         try {
@@ -23,8 +23,7 @@ public class ResultWriter {
                     try {
                         printer.printRecord(
                                 Arrays.asList(
-                                        person.getFirstName(),
-                                        person.getControlNumber(),
+                                        person.getMessageNumber(),
                                         person.getSendTimestamp(),
                                         LocalDateTime.ofInstant(Instant.ofEpochMilli(person.getSendTimestamp()), ZoneId.systemDefault()),
                                         person.getReceiveTimestamp(),
