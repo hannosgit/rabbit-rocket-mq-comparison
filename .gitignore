@@ -33,3 +33,4 @@ build/
 .vscode/
 /rocketmq/namesrv/
 /rocketmq/broker/
+/results/*
