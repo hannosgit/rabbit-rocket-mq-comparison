@@ -9,22 +9,19 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.time.Instant;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
-
-import static com.firstexample.common.Settings.MESSAGES_TO_SEND;
 
 @Slf4j
 @EnableScheduling
 @SpringBootApplication
 public class ConsumerApplication implements CommandLineRunner {
-
-    private static final String RESULT_FILE_NAME = "result.csv";
-
     private final ConcurrentLinkedQueue<Person> receivedTestObjects = new ConcurrentLinkedQueue<>();
     private final AtomicLong receivedTestObjectsCount = new AtomicLong(0);
 
+    private long checkReceivedObjectsCount;
 
     public static void main(String[] args) {
         SpringApplication.run(ConsumerApplication.class, args);
@@ -33,15 +30,14 @@ public class ConsumerApplication implements CommandLineRunner {
     @Bean
     public Consumer<Person> receiveTestObject() {
         return person -> {
-            final long currentCount = receivedTestObjectsCount.incrementAndGet();
+            if (person.getMessageNumber() == -1L) {
+                // ignore warmup messages
+                return;
+            }
+            receivedTestObjectsCount.incrementAndGet();
 
             person.setReceiveTimestamp(System.currentTimeMillis());
             receivedTestObjects.add(person);
-
-            if (currentCount == MESSAGES_TO_SEND) {
-                System.out.printf("Received %s messages%n", MESSAGES_TO_SEND);
-                executeAfterAllReceived();
-            }
         };
     }
 
@@ -55,14 +51,15 @@ public class ConsumerApplication implements CommandLineRunner {
     }
 
     private void executeAfterAllReceived() {
+        String resultFileName = String.format("./results/results_%s.csv", Instant.now());
+
         try {
             Thread.sleep(1000);
-            ResultWriter.writeResult(RESULT_FILE_NAME, receivedTestObjects);
-            System.out.printf("writing result to CSV '%s' done%n", RESULT_FILE_NAME);
-
+            ResultWriter.writeResult(resultFileName, receivedTestObjects);
+            log.info("writing result to CSV '{}' done", resultFileName);
             receivedTestObjects.clear();
             receivedTestObjectsCount.set(0);
-            System.out.println("Clearing results done");
+            log.info("Clearing results done");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -70,7 +67,16 @@ public class ConsumerApplication implements CommandLineRunner {
 
     @Scheduled(fixedDelay = 10_000L)
     private void log() {
-        log.info("Objects received: {}", receivedTestObjectsCount.get());
+        long currentCount = receivedTestObjectsCount.get();
+        log.info("Objects received: {}", currentCount);
+
+        if (this.checkReceivedObjectsCount != 0 && currentCount == this.checkReceivedObjectsCount) {
+            log.info("No Messages received since 10 seconds -> write result!");
+            executeAfterAllReceived();
+        }
+
+        this.checkReceivedObjectsCount = currentCount;
+
     }
 
 }

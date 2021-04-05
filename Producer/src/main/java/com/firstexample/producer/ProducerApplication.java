@@ -17,12 +17,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.LongStream;
 
 import static com.firstexample.common.Settings.MESSAGES_TO_SEND;
+import static com.firstexample.common.Settings.WARM_UP_MESSAGE_COUNT;
 
 @Slf4j
 @SpringBootApplication
 public class ProducerApplication implements CommandLineRunner {
 
-    private final long[] numbersToSend = LongStream.rangeClosed(1, MESSAGES_TO_SEND).toArray();
+    private final long[] numbersToSend = LongStream.concat(
+            LongStream.generate(() -> -1L).limit(WARM_UP_MESSAGE_COUNT),
+            LongStream.rangeClosed(1, MESSAGES_TO_SEND))
+            .toArray();
 
     private final AtomicInteger cnt = new AtomicInteger(0);
 
@@ -55,7 +59,7 @@ public class ProducerApplication implements CommandLineRunner {
     private Runnable sendMessage() {
         return () -> {
             int currentCnt = cnt.getAndIncrement();
-            if (currentCnt >= MESSAGES_TO_SEND) {
+            if (currentCnt >= MESSAGES_TO_SEND + WARM_UP_MESSAGE_COUNT) {
                 log.info("sending done at {}! cnt: {}, arraysize: {}", Instant.now(), cnt.get(), numbersToSend.length);
                 executorService.shutdown();
                 return;

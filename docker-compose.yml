@@ -14,14 +14,14 @@ services:
     build:
       context: .
       dockerfile: consumer.Dockerfile
+    volumes:
+      - ./results:/project/results
     environment:
       - spring_cloud_stream_binders_localrabbit_environment_spring_rabbitmq_host=rabbitmq
 
 #    ----------------------- RabbitMQ -----------------------
   rabbitmq:
     image: "rabbitmq:3.8.14-alpine"
-    volumes:
-      - ./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
     environment:
       RABBITMQ_DEFAULT_USER: "guest"
       RABBITMQ_DEFAULT_PASS: "guest"
@@ -32,11 +32,11 @@ services:
       - "5672:5672"
 
 
-  prometheus:
-    image: prom/prometheus
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - 9090:9090
-    depends_on:
-      - rabbitmq
+#  prometheus:
+#    image: prom/prometheus
+#    volumes:
+#      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+#    ports:
+#      - 9090:9090
+#    depends_on:
+#      - rabbitmq
