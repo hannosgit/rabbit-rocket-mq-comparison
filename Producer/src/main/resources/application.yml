@@ -8,30 +8,29 @@ spring:
       bindings:
         sendtestobject-out-0:
           destination: my-topic
-          binder: local_rocket
+          binder: localrabbit
           contentType: application/json
 
-      binders:
-
-        local_rocket:
-          type: rocketmq
-          environment:
-            rocketmq:
-              producer:
-                group: producergroup1
-                send-message-timeout: 300000
-                compress-message-body-threshold: 4096
-                max-message-size: 4194304
-                retry-times-when-send-async-failed: 3
-                retry-next-server: false
-                retry-times-when-send-failed: 2
-
-      rocketmq:
+      rabbit:
         bindings:
-          sendtestobject-out-0:
-            producer:
-              sync: false  # must be false, true is too slow | WORKS
-        binder:
-          name-server: namesrv:9876 # local ->  localhost:9876 | docker -> namesrv:9876 WORKS
+          receiveTestObject-in-0:
+            consumer:
+              containerType: SIMPLE # WORKS
+              maxConcurrency: 2 # 1 provides best values and is default
+              acknowledgeMode: AUTO  # WORKS
+              txSize: 100  # WORKS  value suggested in https://www.rabbitmq.com/confirms.html
+
+      binders:
+        localrabbit:
+          type: rabbit
+          environment:
+            spring:
+              rabbitmq:
+                host: localhost # local -> localhost | docker -> rabbitmq
+                port: 5672 # WORKS
+                username: guest # WORKS
+                password: guest # WORKS
+                virtual-host: / # WORKS
+
 
 

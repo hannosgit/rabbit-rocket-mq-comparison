@@ -1,26 +1,35 @@
 server:
   port: 8081
 
-
 spring:
-
   cloud:
     stream:
       bindings:
         receiveTestObject-in-0:
           destination: my-topic
           group: myconsumergroup
-          binder: local_rocket
+          binder: localrabbit
           contentType: application/json
-          consumer:
-            concurrency: 1 # 1 is enough (for RocketMQ) WORKS
+
+      rabbit:
+        bindings:
+          receiveTestObject-in-0:
+            consumer:
+              containerType: SIMPLE # WORKS
+              maxConcurrency: 1 # 1 provides best values and is default
+              acknowledgeMode: AUTO  # WORKS
+              txSize: 100  # WORKS  value suggested in https://www.rabbitmq.com/confirms.html
 
       binders:
-        local_rocket:
-          type: rocketmq
-
-      rocketmq:
-        binder:
-          name-server: namesrv:9876 # local ->  localhost:9876 | docker -> namesrv:9876 WORKS
+        localrabbit:
+          type: rabbit
+          environment:
+            spring:
+              rabbitmq:
+                host: localhost # local -> localhost | docker -> rabbitmq
+                port: 5672 # WORKS
+                username: guest # WORKS
+                password: guest # WORKS
+                virtual-host: / # WORKS
 
 

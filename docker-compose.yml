@@ -8,56 +8,29 @@ services:
       dockerfile: producer.Dockerfile
     environment:
       - send_interval=100
+      - spring_cloud_stream_binders_localrabbit_environment_spring_rabbitmq_host=rabbitmq
 
   consumer:
     build:
       context: .
       dockerfile: consumer.Dockerfile
-
-  # ----------------------- RabbitMQ -----------------------
-#  rabbitmq:
-#    image: "rabbitmq:3.8.14-alpine"
-#    environment:
-#      RABBITMQ_DEFAULT_USER: "guest"
-#      RABBITMQ_DEFAULT_PASS: "guest"
-#      RABBITMQ_DEFAULT_VHOST: "/"
-#    ports:
-#      - "15672:15672"
-#      - "5672:5672"
-
-  # ----------------------- RocketMQ -----------------------
-  namesrv:
-    image: apacherocketmq/rocketmq:4.8.0-alpine
-    ports:
-      - 9876:9876
-    volumes:
-      - ./rocketmq/namesrv/logs:/home/rocketmq/logs
-    command: sh mqnamesrv
-
-  broker:
-    image: apacherocketmq/rocketmq:4.8.0-alpine
-    ports:
-      - 10909:10909
-      - 10911:10911
-      - 10912:10912
-    volumes:
-      - ./rocketmq/broker.conf:/home/rocketmq/rocketmq-4.8.0/conf/broker.conf
-      - ./rocketmq/broker/logs:/home/rocketmq/logs
-    command: sh mqbroker -n namesrv:9876 -c /home/rocketmq/rocketmq-4.8.0/conf/broker.conf
-    depends_on:
-      - namesrv
-
-  rocketmqexporter:
-    image: rocketmq-exporter:latest
-    ports:
-      - 5557:5557
     environment:
-      - rocketmq_config_namesrvAddr=namesrv:9876
-      - rocketmq_config_webTelemetryPath=/metrics
-      - server_port=5557
-      - rocketmq_config_rocketmqVersion=V4_8_0
-    depends_on:
-      - broker
+      - spring_cloud_stream_binders_localrabbit_environment_spring_rabbitmq_host=rabbitmq
+
+#    ----------------------- RabbitMQ -----------------------
+  rabbitmq:
+    image: "rabbitmq:3.8.14-alpine"
+    volumes:
+      - ./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+      RABBITMQ_DEFAULT_VHOST: "/"
+    ports:
+      - "15672:15672"
+      - "15692:15692"
+      - "5672:5672"
+
 
   prometheus:
     image: prom/prometheus
@@ -66,4 +39,4 @@ services:
     ports:
       - 9090:9090
     depends_on:
-      - rocketmqexporter
+      - rabbitmq

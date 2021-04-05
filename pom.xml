@@ -40,8 +40,7 @@
 
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-stream-binder-rocketmq</artifactId>
-            <version>0.9.0.RELEASE</version>
+            <artifactId>spring-cloud-stream-binder-rabbit</artifactId>
         </dependency>
 
         <dependency>

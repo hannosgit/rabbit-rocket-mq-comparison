@@ -69,8 +69,8 @@ public class ConsumerApplication implements CommandLineRunner {
     }
 
     @Scheduled(fixedDelay = 10_000L)
-    private void log(){
-        log.info("Objects received: {}",receivedTestObjectsCount.get());
+    private void log() {
+        log.info("Objects received: {}", receivedTestObjectsCount.get());
     }
 
 }
