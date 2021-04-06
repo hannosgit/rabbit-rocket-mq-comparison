@@ -9,5 +9,6 @@ RUN mkdir /project/results
 
 COPY ./Consumer/target/${APPLICATION_NAME} /project/${APPLICATION_NAME}
 
+
 #run the spring boot application
 ENTRYPOINT java -Djava.security.egd=file:/dev/./urandom -jar /project/${APPLICATION_NAME}

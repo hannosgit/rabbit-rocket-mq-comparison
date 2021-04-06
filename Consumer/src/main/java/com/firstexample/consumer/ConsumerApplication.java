@@ -10,6 +10,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -20,6 +22,7 @@ import java.util.function.Consumer;
 public class ConsumerApplication implements CommandLineRunner {
     private final ConcurrentLinkedQueue<Person> receivedTestObjects = new ConcurrentLinkedQueue<>();
     private final AtomicLong receivedTestObjectsCount = new AtomicLong(0);
+    private final static DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH_mm_ss").withZone(ZoneId.systemDefault());
 
     private long checkReceivedObjectsCount;
 
@@ -51,7 +54,7 @@ public class ConsumerApplication implements CommandLineRunner {
     }
 
     private void executeAfterAllReceived() {
-        String resultFileName = String.format("./results/results_%s.csv", Instant.now());
+        String resultFileName = String.format("./results/results_%s.csv", DATE_TIME_FORMATTER.format(Instant.now()));
 
         try {
             Thread.sleep(1000);

@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: producer.Dockerfile
     environment:
-      - send_interval=100
+      - send_interval=75
       - spring_cloud_stream_binders_localrabbit_environment_spring_rabbitmq_host=rabbitmq
 
   consumer:
@@ -28,15 +28,4 @@ services:
       RABBITMQ_DEFAULT_VHOST: "/"
     ports:
       - "15672:15672"
-      - "15692:15692"
       - "5672:5672"
-
-
-#  prometheus:
-#    image: prom/prometheus
-#    volumes:
-#      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-#    ports:
-#      - 9090:9090
-#    depends_on:
-#      - rabbitmq
