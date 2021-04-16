@@ -12,8 +12,6 @@ spring:
           group: myconsumergroup
           binder: local_rocket
           contentType: application/json
-          consumer:
-            concurrency: 1 # 1 is enough (for RocketMQ) WORKS
 
       binders:
         local_rocket:
