@@ -23,17 +23,9 @@ spring:
               producer:
                 group: producergroup1
                 send-message-timeout: 300000
-                compress-message-body-threshold: 4096
-                max-message-size: 4194304
                 retry-times-when-send-async-failed: 3
-                retry-next-server: false
-                retry-times-when-send-failed: 2
 
       rocketmq:
-        bindings:
-          sendtestobject-out-0:
-            producer:
-              sync: false  # must be false, true is too slow | WORKS
         binder:
           name-server: namesrv:9876 # local ->  localhost:9876 | docker -> namesrv:9876 WORKS
 
