@@ -15,9 +15,6 @@ spring:
         bindings:
           receiveTestObject-in-0:
             consumer:
-              containerType: SIMPLE # WORKS
-              maxConcurrency: 1 # 1 provides best values and is default
-              acknowledgeMode: AUTO  # WORKS
               txSize: 100  # WORKS  value suggested in https://www.rabbitmq.com/confirms.html
 
       binders:
