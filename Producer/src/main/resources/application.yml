@@ -22,6 +22,3 @@ spring:
                 username: guest # WORKS
                 password: guest # WORKS
                 virtual-host: / # WORKS
-
-
-

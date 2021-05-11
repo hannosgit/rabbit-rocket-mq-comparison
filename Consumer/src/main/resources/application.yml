@@ -7,7 +7,6 @@ spring:
       bindings:
         receiveTestObject-in-0:
           destination: my-topic
-          group: myconsumergroup
           binder: localrabbit
           contentType: application/json
 
